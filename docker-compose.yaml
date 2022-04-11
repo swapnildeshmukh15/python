@@ -16,26 +16,26 @@
 version: '2.1'
 
 services:
-  cookiejar-processor:
-    container_name: cookiejar-processor
+  pythonjar-processor:
+    container_name: pythonjar-processor
     build:
       context: .
       dockerfile: ./pyprocessor/Dockerfile
     depends_on:
       - validator
     volumes:
-      - '.:/project/cookiejar/'
+      - '.:/project/pythonjar/'
 
-  cookiejar-client:
-    container_name: cookiejar-client
+  pythonjar-client:
+    container_name: pythonjar-client
     build:
       context: .
       dockerfile: ./pyclient/Dockerfile
     volumes:
-      - '.:/project/cookiejar/'
+      - '.:/project/pythonjar/'
     depends_on:
       - sawtooth-rest-api
-    entrypoint: "bash -c \"sawtooth keygen --force mycookiejar && tail -f /dev/null\""
+    entrypoint: "bash -c \"sawtooth keygen --force mypythonjar && tail -f /dev/null\""
     stop_signal: SIGKILL
 
   sawtooth-rest-api:

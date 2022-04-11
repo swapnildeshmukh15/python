@@ -35,13 +35,15 @@ from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader
 from sawtooth_sdk.protobuf.batch_pb2 import Batch
 
 # The Transaction Family Name
-FAMILY_NAME = 'cookiejar'
+FAMILY_NAME = 'pythonjar'
 # TF Prefix is first 6 characters of SHA-512("cookiejar"), a4d219
+
 
 def _hash(data):
     return hashlib.sha512(data).hexdigest()
 
-class CookieJarClient(object):
+
+class PythonJarClient(object):
     '''Client Cookie Jar class
 
     Supports "bake", "eat", and "count" functions.
@@ -69,14 +71,14 @@ class CookieJarClient(object):
         try:
             private_key = Secp256k1PrivateKey.from_hex(private_key_str)
         except ParseError as err:
-            raise Exception( \
+            raise Exception(
                 'Failed to load private key: {}'.format(str(err)))
 
         self._signer = CryptoFactory(create_context('secp256k1')) \
             .new_signer(private_key)
         self._public_key = self._signer.get_public_key().as_hex()
 
-        # Address is 6-char TF prefix + hash of "mycookiejar"'s public key
+        # Address is 6-char TF prefix + hash of "mypythonjar"'s public key
         self._address = _hash(FAMILY_NAME.encode('utf-8'))[0:6] + \
             _hash(self._public_key.encode('utf-8'))[0:64]
 
@@ -103,7 +105,7 @@ class CookieJarClient(object):
             return base64.b64decode(yaml.safe_load(result)["data"])
         except BaseException:
             return None
-			
+
     def clear(self):
         '''Empty the cookie jar.'''
         try:
@@ -153,17 +155,16 @@ class CookieJarClient(object):
             start_time = time.time()
             while waited < wait:
                 result = self._send_to_rest_api("batch_statuses?id={}&wait={}"
-                                               .format(batch_id, wait))
+                                                .format(batch_id, wait))
                 status = yaml.safe_load(result)['data'][0]['status']
                 waited = time.time() - start_time
 
                 if status != 'PENDING':
                     return result
             return "Transaction timed out after waiting {} seconds." \
-               .format(wait)
+                .format(wait)
         else:
             return result
-
 
     def _wrap_and_send(self, action, amount, wait=None):
         '''Create a transaction, then wrap it in a batch.
@@ -174,7 +175,7 @@ class CookieJarClient(object):
 
         # Generate a CSV UTF-8 encoded string as the payload.
         raw_payload = ",".join([action, str(amount)])
-        payload = raw_payload.encode() # Convert Unicode to bytes
+        payload = raw_payload.encode()  # Convert Unicode to bytes
 
         # Construct the address where we'll store our state.
         # We just have one input and output address (the same one).
@@ -220,9 +221,8 @@ class CookieJarClient(object):
 
         # Send batch_list to the REST API
         result = self._send_to_rest_api("batches",
-                                       batch_list.SerializeToString(),
-                                       'application/octet-stream')
+                                        batch_list.SerializeToString(),
+                                        'application/octet-stream')
 
         # Wait until transaction status is COMMITTED, error, or timed out
         return self._wait_for_status(batch_id, wait, result)
-

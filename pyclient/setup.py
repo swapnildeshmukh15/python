@@ -19,11 +19,11 @@ Python package setup (used by Dockerfile).
 from setuptools import setup, find_packages
 
 setup(
-    name='cookiejar-cli',
+    name='pythonjar-cli',
     version='1.0',
     description='Sawtooth Cookie Jar Example',
     author='Dan Anderson',
-    url='https://github.com/danintel/sawtooth-cookiejar',
+    url='https://github.com/swapnildeshmukh15/python',
     packages=find_packages(),
     install_requires=[
         'aiohttp',
@@ -36,7 +36,6 @@ setup(
     data_files=[],
     entry_points={
         'console_scripts': [
-            'cookiejar = cookiejar_cli:main',
+            'pythonjar = pythonjar_cli:main',
         ]
     })
-

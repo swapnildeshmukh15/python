@@ -36,7 +36,7 @@ DEFAULT_VALIDATOR_URL = 'tcp://localhost:4004'
 # For Docker access:
 #DEFAULT_VALIDATOR_URL = 'tcp://validator:4004'
 # Calculated from the 1st 6 characters of SHA-512("cookiejar"):
-COOKIEJAR_TP_ADDRESS_PREFIX = 'a4d219'
+PYTHONJAR_TP_ADDRESS_PREFIX = 'a4d219'
 
 
 def listen_to_events(delta_filters=None):
@@ -60,7 +60,7 @@ def listen_to_events(delta_filters=None):
     response = client_event_pb2.ClientEventsSubscribeResponse()
     response.ParseFromString(msg.content)
     assert response.status == \
-           client_event_pb2.ClientEventsSubscribeResponse.OK
+        client_event_pb2.ClientEventsSubscribeResponse.OK
 
     # Listen for events in an infinite loop
     print("Listening to events.")
@@ -85,21 +85,20 @@ def listen_to_events(delta_filters=None):
     response = client_event_pb2.ClientEventsUnsubscribeResponse()
     response.ParseFromString(msg.content)
     assert response.status == \
-           client_event_pb2.ClientEventsUnsubscribeResponse.OK
+        client_event_pb2.ClientEventsUnsubscribeResponse.OK
 
 
 def main():
     '''Entry point function for the client CLI.'''
 
     filters = [events_pb2.EventFilter(key="address",
-                                      match_string=
-                                      COOKIEJAR_TP_ADDRESS_PREFIX + ".*",
+                                      match_string=PYTHONJAR_TP_ADDRESS_PREFIX + ".*",
                                       filter_type=events_pb2.
                                       EventFilter.REGEX_ANY)]
 
     try:
         # To listen to all events, pass delta_filters=None :
-        #listen_to_events(delta_filters=None)
+        # listen_to_events(delta_filters=None)
         listen_to_events(delta_filters=filters)
     except KeyboardInterrupt:
         pass
@@ -108,6 +107,7 @@ def main():
     except BaseException as err:
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

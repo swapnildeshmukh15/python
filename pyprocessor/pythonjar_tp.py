@@ -33,14 +33,16 @@ DEFAULT_URL = 'tcp://validator:4004'
 
 LOGGER = logging.getLogger(__name__)
 
-FAMILY_NAME = "cookiejar"
+FAMILY_NAME = "pythonjar"
 # TF Prefix is first 6 characters of SHA-512("cookiejar"), a4d219
+
 
 def _hash(data):
     '''Compute the SHA-512 hash and return the result as hex characters.'''
     return hashlib.sha512(data).hexdigest()
 
-def _get_cookiejar_address(from_key):
+
+def _get_pythonjar_address(from_key):
     '''
     Return the address of a cookiejar object from the cookiejar TF.
 
@@ -48,16 +50,17 @@ def _get_cookiejar_address(from_key):
     plus the result of the hash SHA-512(cookiejar public key).
     '''
     return _hash(FAMILY_NAME.encode('utf-8'))[0:6] + \
-                 _hash(from_key.encode('utf-8'))[0:64]
+        _hash(from_key.encode('utf-8'))[0:64]
 
 
-class CookieJarTransactionHandler(TransactionHandler):
+class PythonJarTransactionHandler(TransactionHandler):
     '''
     Transaction Processor class for the cookiejar Transaction Family.
 
     This TP communicates with the Validator using the accept/get/set functions.
     This implements functions to "bake" or "eat" cookies in a cookie jar.
     '''
+
     def __init__(self, namespace_prefix):
         '''Initialize the transaction handler class.
 
@@ -106,17 +109,17 @@ class CookieJarTransactionHandler(TransactionHandler):
         elif action == "eat":
             self._make_eat(context, amount, from_key)
         elif action == "clear":
-            self._empty_cookie_jar(context, amount, from_key)
+            self._empty_python_jar(context, amount, from_key)
         else:
             LOGGER.info("Unhandled action. Action should be bake or eat")
 
     @classmethod
     def _make_bake(cls, context, amount, from_key):
         '''Bake (add) "amount" cookies.'''
-        cookiejar_address = _get_cookiejar_address(from_key)
+        pythonjar_address = _get_pythonjar_address(from_key)
         LOGGER.info('Got the key %s and the cookiejar address %s.',
-                    from_key, cookiejar_address)
-        state_entries = context.get_state([cookiejar_address])
+                    from_key, pythonjar_address)
+        state_entries = context.get_state([pythonjar_address])
         new_count = 0
 
         if state_entries == []:
@@ -131,22 +134,22 @@ class CookieJarTransactionHandler(TransactionHandler):
             new_count = int(amount) + int(count)
 
         state_data = str(new_count).encode('utf-8')
-        addresses = context.set_state({cookiejar_address: state_data})
+        addresses = context.set_state({pythonjar_address: state_data})
 
         if len(addresses) < 1:
             raise InternalError("State Error")
         context.add_event(
-            event_type="cookiejar/bake",
+            event_type="pythonjar/bake",
             attributes=[("cookies-baked", amount)])
 
     @classmethod
     def _make_eat(cls, context, amount, from_key):
         '''Eat (subtract) "amount" cookies.'''
-        cookiejar_address = _get_cookiejar_address(from_key)
+        pythonjar_address = _get_pythonjar_address(from_key)
         LOGGER.info('Got the key %s and the cookiejar address %s.',
-                    from_key, cookiejar_address)
+                    from_key, pythonjar_address)
 
-        state_entries = context.get_state([cookiejar_address])
+        state_entries = context.get_state([pythonjar_address])
         new_count = 0
 
         if state_entries == []:
@@ -165,30 +168,32 @@ class CookieJarTransactionHandler(TransactionHandler):
         LOGGER.info('Eating %s cookies out of %d.', amount, count)
         state_data = str(new_count).encode('utf-8')
         addresses = context.set_state(
-            {_get_cookiejar_address(from_key): state_data})
+            {_get_pythonjar_address(from_key): state_data})
 
         if len(addresses) < 1:
             raise InternalError("State Error")
         context.add_event(
-            event_type="cookiejar/eat",
+            event_type="pythonjar/eat",
             attributes=[("cookies-ate", amount)])
 
     @classmethod
     def _empty_cookie_jar(cls, context, amount, from_key):
-        cookie_jar_address = _get_cookiejar_address(from_key)
-        LOGGER.info("fetched key %s and state address %s", from_key, cookie_jar_address)
-        state_entries = context.get_state([cookie_jar_address])
+        python_jar_address = _get_pythonjar_address(from_key)
+        LOGGER.info("fetched key %s and state address %s",
+                    from_key, python_jar_address)
+        state_entries = context.get_state([python_jar_address])
         if state_entries == []:
             LOGGER.info('No cookie jar with the key %s.', from_key)
             return
         else:
             state_data = str(0).encode('utf-8')
             addresses = context.set_state(
-                {cookie_jar_address: state_data})
+                {python_jar_address: state_data})
 
         if len(addresses) < 1:
             raise InternalError("State update Error")
         LOGGER.info("SET global state success")
+
 
 def main():
     '''Entry-point function for the cookiejar Transaction Processor.'''
@@ -200,7 +205,7 @@ def main():
         # Register the Transaction Handler and start it.
         processor = TransactionProcessor(url=DEFAULT_URL)
         sw_namespace = _hash(FAMILY_NAME.encode('utf-8'))[0:6]
-        handler = CookieJarTransactionHandler(sw_namespace)
+        handler = PythonJarTransactionHandler(sw_namespace)
         processor.add_handler(handler)
         processor.start()
     except KeyboardInterrupt:
@@ -210,6 +215,7 @@ def main():
     except BaseException as err:
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
