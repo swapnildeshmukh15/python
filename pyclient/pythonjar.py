@@ -142,10 +142,9 @@ def do_empty():
     privkeyfile = _get_private_keyfile(KEY_NAME)
     client = PythonJarClient(base_url=DEFAULT_URL, key_file=privkeyfile)
     data = client.empty()
-    if data is not None:
-        print("Empty Response: {}".format(data.decode()))
-    else:
-        raise Exception("Cookie jar data not found")
+    
+    print("Empty Response: {}".format(data))
+    
 
 def do_clear():
     '''Subcommand to empty cookie jar. Calls client class to do the clearing.'''
