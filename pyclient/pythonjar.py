@@ -89,6 +89,9 @@ def create_parser(prog_name):
     eat_subparser.add_argument('amount',
                                type=int,
                                help='the number of cookies to eat')
+    empty_subparser = subparsers.add_parser('empty',
+                                           help=' delete all cookies',
+                                           parents=[parent_parser])
     subparsers.add_parser('count',
                           help='show number of cookies in ' +
                           'the cookie jar',
@@ -133,7 +136,16 @@ def do_count():
         print("\nThe cookie jar has {} cookies.\n".format(data.decode()))
     else:
         raise Exception("Cookie jar data not found")
-
+        
+def do_empty():
+    '''Subcommand to cempty all cookies.  Calls client class to do the cleaning.'''
+    privkeyfile = _get_private_keyfile(KEY_NAME)
+    client = PythonJarClient(base_url=DEFAULT_URL, key_file=privkeyfile)
+    data = client.empty()
+    if data is not None:
+        print("Empty Response: {}".format(data.decode()))
+    else:
+        raise Exception("Cookie jar data not found")
 
 def do_clear():
     '''Subcommand to empty cookie jar. Calls client class to do the clearing.'''
@@ -162,6 +174,8 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
             do_count()
         elif args.command == 'clear':
             do_clear()
+        elif args.command == 'empty':
+            do_empty()
         else:
             raise Exception("Invalid command: {}".format(args.command))
 

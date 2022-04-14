@@ -110,6 +110,8 @@ class PythonJarTransactionHandler(TransactionHandler):
             self._make_eat(context, amount, from_key)
         elif action == "clear":
             self._empty_python_jar(context, amount, from_key)
+        elif action == "empty":
+            self._empty_python_jar(context, amount, from_key)
         else:
             LOGGER.info("Unhandled action. Action should be bake or eat")
 

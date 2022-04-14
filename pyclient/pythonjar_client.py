@@ -106,6 +106,16 @@ class PythonJarClient(object):
         except BaseException:
             return None
 
+    def empty(self):
+        '''Count the number of cookies in the cookie jar.'''
+        
+        try:
+            ret_amount = self._wrap_and_send("empty", 0, wait=10)
+            
+        except Exception:
+            raise Exception('Encountered an error during empty')
+        return ret_amount
+
     def clear(self):
         '''Empty the cookie jar.'''
         try:
